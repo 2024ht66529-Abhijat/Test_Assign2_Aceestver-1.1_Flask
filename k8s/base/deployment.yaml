@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceestver
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+  template:
+    spec:
+      containers:
+      - name: aceestver
+        image: dockerhub-username/aceestver:stable
+        ports:
+        - containerPort: 5000
