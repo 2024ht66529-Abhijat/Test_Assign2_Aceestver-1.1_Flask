@@ -1,6 +1,24 @@
 name: Aceestver CI/CD
 
-on: [push]
+on:
+  push:
+    branches: ["main"]
+
+    workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      run-tests:
+        description: 'Run tests before deployment?'
+        required: false
+        default: 'true'
+        type: boolean
 
 jobs:
   build-test-push:
