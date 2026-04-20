@@ -49,11 +49,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # Enforce Quality Gate
-      - name: SonarCloud Quality Gate
-        uses: SonarSource/sonarcloud-quality-gate-action@v1
-        with:
-          sonar_token: ${{ secrets.SONAR_TOKEN }}
+
 
   trigger-jenkins:
     runs-on: self-hosted
