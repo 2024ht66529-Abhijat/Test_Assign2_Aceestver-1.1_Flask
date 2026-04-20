@@ -1,10 +1,10 @@
-name: Aceestver CI/CD
+name: ACEest CI 1.1
 
 on:
   push:
     branches: ["main"]
-
-    workflow_dispatch:
+  
+  workflow_dispatch:
     inputs:
       environment:
         description: 'Choose environment to deploy'
@@ -19,6 +19,57 @@ on:
         required: false
         default: 'true'
         type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: pip install -r requirements.txt
+      - run: pytest
+      - run: docker build -t aceest-fitness .
+
+  sonarcloud-analysis:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+
+      # SonarCloud official action
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.host.url=https://sonarcloud.io
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Enforce Quality Gate
+      - name: SonarCloud Quality Gate
+        uses: SonarSource/sonarcloud-quality-gate-action@v1
+        with:
+          sonar_token: ${{ secrets.SONAR_TOKEN }}
+
+  trigger-jenkins:
+    runs-on: self-hosted
+    needs: sonarcloud-analysis
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Trigger Jenkins Job
+        uses: appleboy/jenkins-action@v1
+        with:
+          url: ${{ secrets.JENKINS_URL }}
+          user: "cloud"
+          token: ${{ secrets.JENKINS_TOKEN }}
+          job: "Test-Assignment2"
+          wait: true
+
 
 jobs:
   build-test-push:
