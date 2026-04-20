@@ -41,7 +41,7 @@ pipeline {
         '''
       }
     }
-  }
+  
 
     stage('Deploy to Minikube') {
       steps {
@@ -58,7 +58,7 @@ pipeline {
         '''
       }
     }
-  
+  }
   post {
     failure {
       echo '❌ Build failed – rollback safe'
