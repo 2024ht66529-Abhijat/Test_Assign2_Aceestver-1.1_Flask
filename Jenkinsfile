@@ -47,11 +47,14 @@ pipeline {
       steps {
         sh '''
         # Ensure kubectl is pointing to Minikube
+        minikube start --driver=docker
         kubectl config use-context minikube
+        kubectl get nodes
 
         # Apply Kubernetes manifests (Deployment + Service)
         kubectl apply -f k8s/base/deployment.yaml
         kubectl apply -f k8s/base/service.yaml
+        kubectl rollout status deployment/aceestver
 
         # Wait for rollout to complete
         kubectl rollout status deployment/aceestver-deployment
