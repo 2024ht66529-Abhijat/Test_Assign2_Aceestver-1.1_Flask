@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = "dockerhub-username/aceestver"
+    IMAGE_NAME = "2024ht66529/aceestver"
     APP_VERSION = "${env.BRANCH_NAME}"
   }
 
