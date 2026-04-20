@@ -2,10 +2,12 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = "2024ht66529/aceestver"
+    IMAGE_NAME = "dockerhub-username/aceestver"
     APP_VERSION = "${env.BRANCH_NAME}"
   }
 
+ 
+  stages {
 
     stage('Build Docker Image') {
       steps {
@@ -38,4 +40,4 @@ pipeline {
       echo '✅ Build successful'
     }
   }
-
+}
