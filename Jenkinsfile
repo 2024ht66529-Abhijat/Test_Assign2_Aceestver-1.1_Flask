@@ -43,6 +43,22 @@ pipeline {
     }
   }
 
+    stage('Deploy to Minikube') {
+      steps {
+        sh '''
+        # Ensure kubectl is pointing to Minikube
+        kubectl config use-context minikube
+
+        # Apply Kubernetes manifests (Deployment + Service)
+        kubectl apply -f k8s/base/deployment.yaml
+        kubectl apply -f k8s/base/service.yaml
+
+        # Wait for rollout to complete
+        kubectl rollout status deployment/aceestver-deployment
+        '''
+      }
+    }
+  
   post {
     failure {
       echo '❌ Build failed – rollback safe'

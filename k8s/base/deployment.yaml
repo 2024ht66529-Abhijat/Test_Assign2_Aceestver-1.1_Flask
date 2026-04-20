@@ -10,6 +10,6 @@ spec:
     spec:
       containers:
       - name: aceestver
-        image: dockerhub-username/aceestver:stable
+        image: 2024ht66529/aceestver:stable
         ports:
         - containerPort: 5000

@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: aceestver-service
 spec:
-  type: NodePort
   selector:
-    app: aceestver
+    app: aceestver   # must match the label in your Deployment's pod template
   ports:
-    - port: 5000
-      nodePort: 30007
+    - protocol: TCP
+      port: 80        # external port exposed by the LoadBalancer
+      targetPort: 5000 # matches containerPort in deployment.yaml
+  type: LoadBalancer
