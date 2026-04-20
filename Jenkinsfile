@@ -43,24 +43,32 @@ pipeline {
     }
   
 
-    stage('Deploy to Minikube') {
-      steps {
+stage('Deploy to Minikube') {
+    steps {
         sh '''
-        # Ensure kubectl is pointing to Minikube
-        minikube start --driver=docker
-        kubectl config use-context minikube
-        kubectl get nodes
+          # Start Minikube with explicit runtime
+          minikube start --driver=docker --container-runtime=docker
 
-        # Apply Kubernetes manifests (Deployment + Service)
-        kubectl apply -f k8s/base/deployment.yaml
-        kubectl apply -f k8s/base/service.yaml
-        kubectl rollout status deployment/aceestver
+          # Export kubeconfig so kubectl knows where to connect
+          export KUBECONFIG=$(minikube kubeconfig)
 
-        # Wait for rollout to complete
-        kubectl rollout status deployment/aceestver-deployment
+          echo "Waiting for Kubernetes API server to become ready..."
+          for i in {1..30}; do
+            if kubectl cluster-info; then
+              echo "✅ Kubernetes cluster is ready!"
+              break
+            fi
+            echo "⏳ Still waiting... attempt $i"
+            sleep 10
+          done
+
+          # Optional: verify nodes and system pods
+          kubectl get nodes
+          kubectl get pods -n kube-system
         '''
-      }
     }
+}
+
   }
   post {
     failure {
