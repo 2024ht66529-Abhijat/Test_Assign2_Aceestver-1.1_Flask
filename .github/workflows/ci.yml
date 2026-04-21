@@ -63,7 +63,7 @@ jobs:
           url: ${{ secrets.JENKINS_URL }}
           user: "cloud"
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: "Test-Assignment2"
+          job: "Test_Assignment2"
           wait: true
 
 

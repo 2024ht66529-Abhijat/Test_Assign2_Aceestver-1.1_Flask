@@ -67,6 +67,7 @@ pipeline {
 
           # Apply the Deployment manifest
           kubectl apply -f k8s/base/deployment.yaml
+          kubectl apply -f k8s/base/services.yaml
 
           # Wait for rollout to finish
           kubectl rollout status deployment/aceestver || {
