@@ -3,10 +3,14 @@ kind: Deployment
 metadata:
   name: aceestver
 spec:
-  replicas: 3
-  strategy:
-    type: RollingUpdate
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceestver
   template:
+    metadata:
+      labels:
+        app: aceestver
     spec:
       containers:
       - name: aceestver

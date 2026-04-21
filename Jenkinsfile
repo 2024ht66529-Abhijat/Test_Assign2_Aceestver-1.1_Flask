@@ -79,11 +79,18 @@ pipeline {
 
             echo "📜 Dumping pod logs for debugging..."
             for pod in $(kubectl get pods -n default -l app=aceestver -o jsonpath='{.items[*].metadata.name}'); do
-              echo "---- Logs for pod: $pod ----"
-              kubectl logs $pod -n default || true
+            echo "---- Logs for pod: $pod ----"
+            kubectl logs $pod -n default || true
+            echo "---- Describe for pod: $pod ----"
+            kubectl describe pod $pod -n default || true
+
             done
             exit 1
           }
+
+          # Print the service URL for direct access
+          echo "🌐 Application is accessible at:"
+          minikube service aceestver-service --url
         '''
       }
     }
@@ -95,6 +102,10 @@ pipeline {
     }
     success {
       echo '✅ Build and rollout successful'
+      sh '''
+        echo "🌐 Final Service URL:"
+        minikube service aceestver-service --url
+      '''
     }
   }
 }

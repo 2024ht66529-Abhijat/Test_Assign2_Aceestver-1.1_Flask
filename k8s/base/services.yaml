@@ -7,6 +7,7 @@ spec:
     app: aceestver   # must match the label in your Deployment's pod template
   ports:
     - protocol: TCP
-      port: 80        # external port exposed by the LoadBalancer
-      targetPort: 5000 # matches containerPort in deployment.yaml
-  type: LoadBalancer
+      port: 5000       # service port (matches containerPort)
+      targetPort: 5000 # container port inside the pod
+      nodePort: 30080  # optional fixed NodePort (range: 30000–32767)
+  type: NodePort
