@@ -46,7 +46,10 @@ pipeline {
       steps {
         sh '''
           # Start Minikube with explicit runtime
-          minikube start --driver=docker --container-runtime=docker
+          # minikube start --driver=docker --container-runtime=docker
+          minikube delete || true
+          minikube start --driver=docker --container-runtime=containerd
+
 
           # Export kubeconfig so kubectl knows where to connect
           export KUBECONFIG=$(minikube kubeconfig)
@@ -73,6 +76,12 @@ pipeline {
           kubectl rollout status deployment/aceestver || {
             echo "❌ Rollout failed, attempting rollback..."
             kubectl rollout undo deployment/aceestver
+
+            echo "📜 Dumping pod logs for debugging..."
+            for pod in $(kubectl get pods -n default -l app=aceestver -o jsonpath='{.items[*].metadata.name}'); do
+              echo "---- Logs for pod: $pod ----"
+              kubectl logs $pod -n default || true
+            done
             exit 1
           }
         '''
