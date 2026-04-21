@@ -106,6 +106,10 @@ pipeline {
         echo "🌐 Final Service URL:"
         minikube service aceestver-service --url
       '''
+    always {
+      echo '📊 Cluster state snapshot:'
+      sh 'kubectl get pods -A'
+    }  
     }
   }
 }
