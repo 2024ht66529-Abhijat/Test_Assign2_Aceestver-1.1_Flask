@@ -41,10 +41,9 @@ pipeline {
         '''
       }
     }
-  
 
-stage('Deploy to Minikube') {
-    steps {
+    stage('Deploy to Minikube') {
+      steps {
         sh '''
           # Start Minikube with explicit runtime
           minikube start --driver=docker --container-runtime=docker
@@ -65,17 +64,27 @@ stage('Deploy to Minikube') {
           # Optional: verify nodes and system pods
           kubectl get nodes
           kubectl get pods -n kube-system
-        '''
-    }
-}
 
+          # Apply the Deployment manifest
+          kubectl apply -f k8s/base/deployment.yaml
+
+          # Wait for rollout to finish
+          kubectl rollout status deployment/aceestver || {
+            echo "❌ Rollout failed, attempting rollback..."
+            kubectl rollout undo deployment/aceestver
+            exit 1
+          }
+        '''
+      }
+    }
   }
+
   post {
     failure {
-      echo '❌ Build failed – rollback safe'
+      echo '❌ Build failed – rollback attempted'
     }
     success {
-      echo '✅ Build successful'
+      echo '✅ Build and rollout successful'
     }
   }
 }
