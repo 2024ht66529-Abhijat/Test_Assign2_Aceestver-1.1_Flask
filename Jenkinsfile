@@ -45,11 +45,11 @@ pipeline {
     stage('Deploy to Minikube') {
       steps {
         sh '''
-          # Start Minikube with explicit runtime
-          # minikube start --driver=docker --container-runtime=docker
+          # Reset Minikube to avoid stale cluster state
           minikube delete || true
-          minikube start --driver=docker --container-runtime=containerd
 
+          # Start Minikube with explicit runtime
+          minikube start --driver=docker --container-runtime=containerd
 
           # Export kubeconfig so kubectl knows where to connect
           export KUBECONFIG=$(minikube kubeconfig)
@@ -64,9 +64,12 @@ pipeline {
             sleep 10
           done
 
-          # Optional: verify nodes and system pods
+          # verify nodes and system pods
           kubectl get nodes
           kubectl get pods -n kube-system
+
+          # Start Minikube tunnel in background to expose services
+          nohup minikube tunnel > /dev/null 2>&1 &
 
           # Apply the Deployment manifest
           kubectl apply -f k8s/base/deployment.yaml
