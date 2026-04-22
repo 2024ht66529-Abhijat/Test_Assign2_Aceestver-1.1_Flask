@@ -53,7 +53,7 @@ pipeline {
        stage('Deploy to Minikube') {
             steps {
                 sh '''
-                    minikube delete || true
+                    minikube delete --all --purge
                     minikube start --driver=docker --container-runtime=containerd
                     minikube update-context
 
