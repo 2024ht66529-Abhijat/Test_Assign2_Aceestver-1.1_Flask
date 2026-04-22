@@ -62,6 +62,7 @@ pipeline {
     '''
   }
 }
+}
 post {
   success {
     echo '✅ Build and rollout successful'
@@ -83,4 +84,4 @@ post {
   }
 }
 }
-}
+
