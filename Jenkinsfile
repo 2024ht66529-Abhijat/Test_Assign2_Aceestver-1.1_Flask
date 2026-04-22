@@ -56,9 +56,9 @@ pipeline {
       kubectl rollout status deployment/aceestver
 
       echo "🌐 Setting up port-forward..."
-      nohup kubectl port-forward svc/aceestver-service 8080:5000 > /dev/null 2>&1 &
+      nohup kubectl port-forward svc/aceestver-service 9090:5000 > /dev/null 2>&1 &
       sleep 5
-      echo "🌐 Application is accessible at: http://127.0.0.1:8080"
+      echo "🌐 Application is accessible at: http://127.0.0.1:9090"
     '''
   }
 }
