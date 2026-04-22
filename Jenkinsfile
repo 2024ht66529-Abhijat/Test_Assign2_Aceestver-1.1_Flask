@@ -76,7 +76,10 @@ post {
     echo '📊 Cluster state snapshot:'
     sh 'kubectl get pods -A'
   
-    pkill -f "kubectl port-forward" || true
+        // cleanup port-forward background process
+    sh '''
+      pkill -f "kubectl port-forward" || true
+    '''
   }
 }
 }
