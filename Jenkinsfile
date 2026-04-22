@@ -2,9 +2,12 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "2024ht66529/aceestver"
-        APP_VERSION = "stable"
-        APP_PORT = "9090"   // host port for forwarding
+        IMAGE_NAME     = "2024ht66529/aceestver"
+        APP_VERSION    = "stable"
+        APP_PORT       = "9090"   // avoid Jenkins 8080 conflict
+        KUBECONFIG     = "${env.HOME}/.kube/config"
+        MINIKUBE_HOME  = "${env.HOME}/.minikube"
+        PATH           = "/usr/local/bin:${env.PATH}" // ensure minikube/kubectl are visible
     }
 
     stages {
@@ -53,16 +56,20 @@ pipeline {
        stage('Deploy to Minikube') {
             steps {
                 sh '''
-                    minikube delete --all --purge
-                    minikube start --driver=docker --container-runtime=containerd
+                    minikube delete --all --purge || true
+                    minikube start --driver=docker --container-runtime=containerd --force
                     minikube update-context
 
-                    export KUBECONFIG=$HOME/.kube/config
+
+
+                    echo "=== Cluster Info ==="
+                    kubectl cluster-info
+                    kubectl get nodes
 
                     kubectl apply -f k8s/base/deployment.yaml --validate=false
                     kubectl apply -f k8s/base/services.yaml --validate=false
 
-                    kubectl rollout status deployment/aceestver
+                    kubectl rollout status deployment/aceestver --timeout=120s
 
                     echo "🌐 Setting up port-forward..."
                     nohup kubectl port-forward svc/aceestver-service $APP_PORT:5000 > /dev/null 2>&1 &
