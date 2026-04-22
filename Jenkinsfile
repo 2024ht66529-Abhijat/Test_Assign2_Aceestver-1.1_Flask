@@ -67,7 +67,7 @@ post {
   success {
     echo '✅ Build and rollout successful'
     sh '''
-      echo "🌐 Final Service URL (summary): http://127.0.0.1:8080"
+      echo "🌐 Final Service URL (summary): http://127.0.0.1:9090"
     '''
   }
   failure {
