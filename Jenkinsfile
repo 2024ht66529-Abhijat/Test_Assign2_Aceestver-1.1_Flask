@@ -45,70 +45,28 @@ pipeline {
     stage('Deploy to Minikube') {
   steps {
     sh '''
-      # Reset Minikube to avoid stale cluster state
       minikube delete || true
       minikube start --driver=docker --container-runtime=containerd
 
       export KUBECONFIG=$HOME/.kube/config
 
-      echo "Waiting for Kubernetes API server to become ready..."
-      for i in {1..30}; do
-        if kubectl cluster-info; then
-          echo "✅ Kubernetes cluster is ready!"
-          break
-        fi
-        echo "⏳ Still waiting... attempt $i"
-        sleep 10
-      done
-
-      kubectl get nodes
-      kubectl get pods -n kube-system
-
-      # Try to start Minikube tunnel in background
-      echo "🔌 Starting Minikube tunnel..."
-      nohup minikube tunnel > /dev/null 2>&1 &
-      sleep 5
-
-      # Apply Deployment and Service manifests
       kubectl apply -f k8s/base/deployment.yaml
       kubectl apply -f k8s/base/services.yaml
 
-      # Wait for rollout to finish
-      kubectl rollout status deployment/aceestver || {
-        echo "❌ Rollout failed, attempting rollback..."
-        kubectl rollout undo deployment/aceestver
+      kubectl rollout status deployment/aceestver
 
-        echo "📜 Dumping pod logs for debugging..."
-        for pod in $(kubectl get pods -n default -l app=aceestver -o jsonpath='{.items[*].metadata.name}'); do
-          echo "---- Logs for pod: $pod ----"
-          kubectl logs $pod -n default || true
-          echo "---- Describe for pod: $pod ----"
-          kubectl describe pod $pod -n default || true
-        done
-
-        exit 1
-      }
-
-      # Try to get service URL via tunnel
-      echo "🌐 Application is accessible at (tunnel):"
-      if ! minikube service aceestver-service --url; then
-        echo "⚠️ Tunnel failed, falling back to port-forward..."
-        nohup kubectl port-forward svc/aceestver-service 8080:5000 > /dev/null 2>&1 &
-        echo "🌐 Application is accessible at: http://127.0.0.1:8080"
-      fi
+      echo "🌐 Setting up port-forward..."
+      nohup kubectl port-forward svc/aceestver-service 8080:5000 > /dev/null 2>&1 &
+      sleep 5
+      echo "🌐 Application is accessible at: http://127.0.0.1:8080"
     '''
   }
-}
 }
 post {
   success {
     echo '✅ Build and rollout successful'
     sh '''
-      echo "🌐 Final Service URL (summary):"
-      if ! minikube service aceestver-service --url; then
-        echo "⚠️ Tunnel failed, fallback URL:"
-        echo "http://127.0.0.1:8080"
-      fi
+      echo "🌐 Final Service URL (summary): http://127.0.0.1:8080"
     '''
   }
   failure {
@@ -117,6 +75,8 @@ post {
   always {
     echo '📊 Cluster state snapshot:'
     sh 'kubectl get pods -A'
+    # Cleanup port-forward to avoid background processes piling up
+    pkill -f "kubectl port-forward" || true
   }
 }
 }
