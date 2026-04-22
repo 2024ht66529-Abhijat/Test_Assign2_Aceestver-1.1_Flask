@@ -1,87 +1,91 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    IMAGE_NAME = "2024ht66529/aceestver"
-    APP_VERSION = "${env.BRANCH_NAME}"
-  }
+    environment {
+        IMAGE_NAME = "2024ht66529/aceestver"
+        APP_VERSION = "stable"
+        APP_PORT = "9090"   // host port for forwarding
+    }
 
-  stages {
-
-    stage('Docker Hub Login') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
-                                          usernameVariable: 'DOCKER_USER', 
-                                          passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
-          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-          '''
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
         }
-      }
+
+        stage('Docker Hub Login') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-pass', variable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u 2024ht66529 --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t $IMAGE_NAME:$APP_VERSION .
+                '''
+            }
+        }
+
+        stage('Run Tests in Container') {
+            steps {
+                sh '''
+                    docker run $IMAGE_NAME:$APP_VERSION pytest
+                '''
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh '''
+                    docker push $IMAGE_NAME:$APP_VERSION
+                '''
+            }
+        }
+
+        stage('Deploy to Minikube') {
+            steps {
+                sh '''
+                    minikube delete || true
+                    minikube start --driver=docker --container-runtime=containerd
+                    minikube update-context
+
+                    export KUBECONFIG=$HOME/.kube/config
+
+                    kubectl apply -f k8s/base/deployment.yaml --validate=false
+                    kubectl apply -f k8s/base/services.yaml --validate=false
+
+                    kubectl rollout status deployment/aceestver
+
+                    echo "🌐 Setting up port-forward..."
+                    nohup kubectl port-forward svc/aceestver-service $APP_PORT:5000 > /dev/null 2>&1 &
+                    sleep 5
+                    echo "🌐 Application is accessible at: http://127.0.0.1:$APP_PORT"
+                '''
+            }
+        }
     }
 
-    stage('Build Docker Image') {
-      steps {
-        sh 'docker build -t $IMAGE_NAME:$APP_VERSION .'
-      }
+    post {
+        always {
+            sh '''
+                echo "📊 Cluster state snapshot:"
+                kubectl get pods -A || true
+
+                # Cleanup port-forward
+                pkill -f "kubectl port-forward" || true
+            '''
+        }
+        success {
+            echo "✅ Build and rollout successful"
+            sh '''
+                echo "🌐 Final Service URL (summary): http://127.0.0.1:$APP_PORT"
+            '''
+        }
     }
-
-    stage('Run Tests in Container') {
-      steps {
-        sh 'docker run $IMAGE_NAME:$APP_VERSION pytest'
-      }
-    }
-
-    stage('Push Image') {
-      steps {
-        sh '''
-        docker tag $IMAGE_NAME:$APP_VERSION $IMAGE_NAME:stable
-        docker push $IMAGE_NAME:$APP_VERSION
-        docker push $IMAGE_NAME:stable
-        '''
-      }
-    }
-
-    stage('Deploy to Minikube') {
-  steps {
-    sh '''
-      minikube delete || true
-      minikube start --driver=docker --container-runtime=containerd
-
-      export KUBECONFIG=$HOME/.kube/config
-
-      kubectl apply -f k8s/base/deployment.yaml
-      kubectl apply -f k8s/base/services.yaml
-
-      kubectl rollout status deployment/aceestver
-
-      echo "🌐 Setting up port-forward..."
-      nohup kubectl port-forward svc/aceestver-service 9090:5000 > /dev/null 2>&1 &
-      sleep 5
-      echo "🌐 Application is accessible at: http://127.0.0.1:9090"
-    '''
-  }
 }
-}
-post {
-  success {
-    echo '✅ Build and rollout successful'
-    sh '''
-      echo "🌐 Final Service URL (summary): http://127.0.0.1:9090"
-    '''
-  }
-  failure {
-    echo '❌ Build failed – rollback attempted'
-  }
-  always {
-    echo '📊 Cluster state snapshot:'
-    sh 'kubectl get pods -A'
-  
-        // cleanup port-forward background process
-    sh '''
-      pkill -f "kubectl port-forward" || true
-    '''
-  }
-}
-}
-
