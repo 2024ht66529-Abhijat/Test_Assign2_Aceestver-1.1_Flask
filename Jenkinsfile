@@ -99,7 +99,7 @@ pipeline {
     '''
   }
 }
-
+}
 post {
   success {
     echo '✅ Build and rollout successful'
@@ -118,6 +118,5 @@ post {
     echo '📊 Cluster state snapshot:'
     sh 'kubectl get pods -A'
   }
-}
 }
 }
