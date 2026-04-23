@@ -86,7 +86,7 @@ pipeline {
                 kubectl get pods -A || true
 
                 # Cleanup port-forward
-                pkill -f "kubectl port-forward" || true
+               # pkill -f "kubectl port-forward" || true
             '''
         }
         success {
