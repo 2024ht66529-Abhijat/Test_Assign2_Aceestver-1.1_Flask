@@ -11,14 +11,21 @@ pipeline {
     }
 
     stages {
+        stage('Sanity Check') {
+            steps {
+                sh 'whoami'
+                sh 'docker ps || echo "Docker not accessible"'
+                sh 'kubectl config current-context || echo "Kubeconfig not accessible"'
+            }
+                }
         stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
 
-    stage('Docker Hub Login') {
-      steps {
+        stage('Docker Hub Login') {
+        steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
                                           usernameVariable: 'DOCKER_USER', 
                                           passwordVariable: 'DOCKER_PASS')]) {
