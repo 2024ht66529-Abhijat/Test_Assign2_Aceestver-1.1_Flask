@@ -67,8 +67,6 @@ pipeline {
                     minikube start --driver=docker --container-runtime=containerd --force
                     minikube update-context
 
-
-
                     echo "=== Cluster Info ==="
                     kubectl cluster-info
                     kubectl get nodes
@@ -84,16 +82,17 @@ pipeline {
                     echo "🌐 Application is accessible at:"
                      minikube service aceestver-service --url 
                    # echo "🌐 Application is accessible at: http://127.0.0.1:$APP_PORT"
-                '''
-                        stage('Verify Service') {
+                '''      
+            }
+        }
+
+       stage('Verify Service') {
             steps {
                 sh '''
                     URL=$(minikube service aceestver-service --url)
                     echo "Testing $URL ..."
                     curl -f $URL || (echo "App not reachable" && exit 1)
                 '''
-            }
-        }
             }
         }
     }
