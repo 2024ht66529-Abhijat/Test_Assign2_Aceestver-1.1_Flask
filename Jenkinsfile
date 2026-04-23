@@ -5,9 +5,9 @@ pipeline {
         IMAGE_NAME     = "2024ht66529/aceestver"
         APP_VERSION    = "stable"
         APP_PORT       = "9090"   // avoid Jenkins 8080 conflict
-        KUBECONFIG     = "${env.HOME}/.kube/config"
-        MINIKUBE_HOME  = "${env.HOME}/.minikube"
-        PATH           = "/usr/local/bin:${env.PATH}" // ensure minikube/kubectl are visible
+        KUBECONFIG    = "/home/abhij/.kube/config"
+        MINIKUBE_HOME = "/home/abhij/.minikube"
+        PATH          = "/usr/local/bin:${env.PATH}"
     }
 
     stages {
