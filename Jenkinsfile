@@ -82,9 +82,18 @@ pipeline {
                    # nohup kubectl port-forward svc/aceestver-service $APP_PORT:5000 > /dev/null 2>&1 &
                    # sleep 5
                     echo "🌐 Application is accessible at:"
-                     minikube service aceestver-service --url --format "{{.URL}}"
+                     minikube service aceestver-service --url 
                    # echo "🌐 Application is accessible at: http://127.0.0.1:$APP_PORT"
                 '''
+                        stage('Verify Service') {
+            steps {
+                sh '''
+                    URL=$(minikube service aceestver-service --url)
+                    echo "Testing $URL ..."
+                    curl -f $URL || (echo "App not reachable" && exit 1)
+                '''
+            }
+        }
             }
         }
     }
