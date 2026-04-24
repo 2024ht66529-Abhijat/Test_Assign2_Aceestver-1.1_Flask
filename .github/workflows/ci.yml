@@ -63,7 +63,7 @@ jobs:
           url: ${{ secrets.JENKINS_URL_L }}
           user: "abhij"
           token: ${{ secrets.JENKINS_TOKEN_L }}
-          job: "Test_Assignment2"
+          job: "Test-Assignment2"
 
     
 
