@@ -25,11 +25,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - run: pip install -r requirements.txt
-      - run: pytest
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov coverage
+
+      - run: pytest --cov=app --cov-report=xml:coverage.xml
+
       - run: docker build -t aceest-fitness .
 
   sonarcloud-analysis:
@@ -37,8 +46,9 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   
 
-      # SonarCloud official action
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
@@ -46,11 +56,11 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.python.version=3.10
+            -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-
-    
   trigger-jenkins:
     runs-on: self-hosted
     needs: sonarcloud-analysis
@@ -65,11 +75,8 @@ jobs:
           token: ${{ secrets.JENKINS_TOKEN_L }}
           job: "Test-Assignment2"
 
-    
-
   build-test-push:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
