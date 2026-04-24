@@ -61,7 +61,7 @@ jobs:
         uses: appleboy/jenkins-action@v1
         with:
           url: ${{ secrets.JENKINS_URL_L }}
-          user: "abhij"
+          user: "Abhijat_2024ht66529"
           token: ${{ secrets.JENKINS_TOKEN_L }}
           job: "Test-Assignment2"
 
