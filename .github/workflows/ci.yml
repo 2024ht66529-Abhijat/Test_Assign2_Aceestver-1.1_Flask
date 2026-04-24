@@ -51,30 +51,20 @@ jobs:
 
 
     
- # trigger-jenkins:
-  #  runs-on: self-hosted
-   # needs: sonarcloud-analysis
-   # steps: 
-   #   - name: Checkout code
-   #     uses: actions/checkout@v3
-   #   - name: Trigger Jenkins Job
-    #    uses: appleboy/jenkins-action@v1
-   #     with:
-   #       url: ${{ secrets.JENKINS_URL_L }}
-    #      user: "cloud"
-    #      token: ${{ secrets.JENKINS_TOKEN_L }}
-     #     job: "Test_Assignment2"
   trigger-jenkins:
-    runs-on: ubuntu-latest
-    steps:
+    runs-on: self-hosted
+    needs: sonarcloud-analysis
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Trigger Jenkins Job
-        uses: appleboy/jenkins-action@master
+        uses: appleboy/jenkins-action@v1
         with:
           url: ${{ secrets.JENKINS_URL_L }}
           user: "abhij"
           token: ${{ secrets.JENKINS_TOKEN_L }}
-          job: "Test_Assignment2" 
-          wait: true
+          job: "Test_Assignment2"
+
     
 
   build-test-push:
