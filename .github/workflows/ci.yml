@@ -41,6 +41,12 @@ jobs:
       - name: Run tests with coverage
         run: pytest --cov=app --cov-report=xml:coverage.xml
 
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
       - name: Build Docker image
         run: docker build -t aceest-fitness .
 
@@ -52,10 +58,10 @@ jobs:
         with:
           fetch-depth: 0   # avoids shallow clone warning
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
         with:
-          python-version: '3.10'
+          name: coverage-report
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
