@@ -1,14 +1,10 @@
 
-<!doctype html><htmllang><head><title>ACEest 1.1</title></head>
-<body style="background:#1a1a1a;color:white;font-family:Arial, Helvetica, sans-serif, Verdana, Tahoma;">
-<h1 style="color:#d4af37">ACEest Functional Fitness System</h1>
-<form method="post">
-<label>Weight (kg)</label><input name="weight"><br><br>
-<select name="program">{% for p in programs %}<option>{{p}}</option>{% endfor %}</select>
-<button>Calculate</button></form>
-{% if calories %}<h2>Estimated Calories: {{calories}} kcal</h2>{% endif %}
+<!doctype html><html><head><title>ACEest Fitness</title></head>
+<body style="background:#1a1a1a;color:white;font-family:Arial">
+<h1>ACEest Functional Fitness</h1>
 {% for k,v in programs.items() %}
-<h3 style="color:{{v.color}}">{{k}}</h3>
-<p>{{v.workout|safe}}</p>
-<p>{{v.diet|safe}}</p>{% endfor %}
+<h2 style="color:{{v.color}}">{{k}}</h2>
+<b>Workout</b><p>{{v.workout|safe}}</p>
+<b>Diet</b><p>{{v.diet|safe}}</p>
+{% endfor %}
 </body></html>
