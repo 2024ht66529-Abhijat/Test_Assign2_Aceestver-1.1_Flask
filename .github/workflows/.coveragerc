@@ -1,0 +1,10 @@
+[run]
+relative_files = True
+branch = True
+
+[report]
+show_missing = True
+skip_covered = True
+
+[xml]
+output = coverage.xml
