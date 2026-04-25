@@ -42,7 +42,7 @@ jobs:
         run: |
           coverage run --source=. -m pytest
           coverage xml -i --rcfile=.coveragerc
-          sed -i 's|<source>.*</source>|<source>.</source>|' coverage.xml
+          python -c "import re; f='coverage.xml'; d=open(f).read(); d=re.sub(r'<source>.*</source>', '<source>.</source>', d); open(f,'w').write(d)"
       - name: Debug coverage.xml before upload
         run: grep "<source>" coverage.xml
 
