@@ -1,25 +1,3 @@
-name: CI
-
-on:
-  push:
-    branches: ["main"]
-  
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Choose environment to deploy'
-        required: true
-        default: 'staging'
-        type: choice
-        options:
-          - staging
-          - production
-      run-tests:
-        description: 'Run tests before deployment?'
-        required: false
-        default: 'true'
-        type: boolean
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,9 +20,15 @@ jobs:
         run: |
           coverage run --source=. -m pytest
           coverage xml -i --rcfile=.coveragerc
+
+      - name: Normalize coverage.xml with Python
+        run: |
           python -c "import re; f='coverage.xml'; d=open(f).read(); d=re.sub(r'<source>.*</source>', '<source>.</source>', d); open(f,'w').write(d)"
+
       - name: Debug coverage.xml before upload
-        run: grep "<source>" coverage.xml
+        run: |
+          grep "<source>" coverage.xml
+          cat coverage.xml | head -n 20   # show first 20 lines
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -66,7 +50,9 @@ jobs:
           name: coverage-report
 
       - name: Debug coverage.xml after download
-        run: grep "<source>" coverage.xml
+        run: |
+          grep "<source>" coverage.xml
+          cat coverage.xml | head -n 20   # show first 20 lines
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
