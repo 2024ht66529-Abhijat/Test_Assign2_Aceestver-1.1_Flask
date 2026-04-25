@@ -91,7 +91,7 @@ jobs:
             -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-trigger-jenkins:
+  trigger-jenkins:
     runs-on: self-hosted
     needs: sonarcloud-analysis
     steps: 
@@ -107,8 +107,8 @@ trigger-jenkins:
           wait: true
 
 
-#jobs:
-build-test-push:
+  #jobs:
+  build-test-push:
     runs-on: ubuntu-latest
 
     steps:
