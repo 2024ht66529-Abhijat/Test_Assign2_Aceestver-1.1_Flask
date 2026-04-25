@@ -100,9 +100,9 @@ jobs:
       - name: Trigger Jenkins Job
         uses: appleboy/jenkins-action@v1
         with:
-          url: ${{ secrets.JENKINS_URL }}
-          user: "cloud"
-          token: ${{ secrets.JENKINS_TOKEN }}
+          url: ${{ secrets.JENKINS_URL_L }}
+          user: "Abhijat_2024ht66529"
+          token: ${{ secrets.JENKINS_TOKEN_L }}
           job: "Test-Assignment2"
           wait: true
 
