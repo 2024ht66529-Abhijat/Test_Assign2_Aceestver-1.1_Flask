@@ -43,7 +43,8 @@ jobs:
           coverage run --source=. -m pytest
           coverage xml -i --rcfile=.coveragerc
           sed -i 's|<source>.*</source>|<source>.</source>|' coverage.xml
-
+      - name: Debug coverage.xml before upload
+        run: grep "<source>" coverage.xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -63,6 +64,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
+
+      - name: Debug coverage.xml after download
+        run: grep "<source>" coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
