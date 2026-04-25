@@ -76,16 +76,14 @@ pipeline {
 
                     kubectl rollout status deployment/aceestver --timeout=120s
 
-                   # echo "🌐 Setting up port-forward..."
-                   # nohup kubectl port-forward svc/aceestver-service $APP_PORT:5000 > /dev/null 2>&1 &
-                   # sleep 5
+                   
                      echo "🌐 Starting minikube tunnel..."
                         nohup minikube tunnel --cleanup > /dev/null 2>&1 &
                         sleep 10
                      
                      echo "🌐 Application is accessible at:"
                      minikube service aceestver-service --url 
-                   # echo "🌐 Application is accessible at: http://127.0.0.1:$APP_PORT"
+                   
                 '''      
             }
         }
@@ -106,17 +104,12 @@ pipeline {
                 echo "📊 Cluster state snapshot:"
                 kubectl get pods -A || true
 
-                # Cleanup port-forward
-               # pkill -f "kubectl port-forward" || true
+
             '''
         }
         success {
             echo "✅ Build and rollout successful"
-            sh '''
-               # echo "🌐 Final Service URL (summary): http://127.0.0.1:$APP_PORT"
-                echo "🌐 Application is accessible at:"
-                minikube service aceestver-service --url
-            '''
+
         }
     }
 }

@@ -1,10 +1,21 @@
+<!doctype html>
+<html>
+<head>
+    <title>ACEest Fitness</title>
+</head>
+<body style="background:#1a1a1a;color:white;font-family:sans-serif;">
+    <h1>ACEest Functional Fitness System</h1>
 
-<!doctype html><html><head><title>ACEest Fitness</title></head>
-<body style="background:#1a1a1a;color:white;font-family:Arial">
-<h1>ACEest Functional Fitness</h1>
-{% for k,v in programs.items() %}
-<h2 style="color:{{v.color}}">{{k}}</h2>
-<b>Workout</b><p>{{v.workout|safe}}</p>
-<b>Diet</b><p>{{v.diet|safe}}</p>
-{% endfor %}
-</body></html>
+    {% if result %}
+        <h2>{{ result }}</h2>
+    {% endif %}
+
+    {% for name, details in programs.items() %}
+        <div style="background:{{ details.color }};padding:10px;margin:10px;">
+            <b>{{ name }}</b>
+            <p>Workout: {{ details.workout|safe }}</p>
+            <p>Diet: {{ details.diet|safe }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>
