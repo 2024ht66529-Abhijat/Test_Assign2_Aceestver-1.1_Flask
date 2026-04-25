@@ -1,6 +1,7 @@
 [run]
 relative_files = True
 branch = True
+source = .
 
 [report]
 show_missing = True

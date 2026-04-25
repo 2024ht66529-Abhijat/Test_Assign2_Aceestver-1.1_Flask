@@ -19,6 +19,7 @@ on:
         required: false
         default: 'true'
         type: boolean
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,7 +40,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          coverage run -m pytest
+          coverage run --source=. -m pytest
           coverage xml -i --rcfile=.coveragerc
 
       - name: Upload coverage report
