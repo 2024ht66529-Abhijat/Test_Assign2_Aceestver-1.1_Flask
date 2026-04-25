@@ -108,20 +108,20 @@ jobs:
 
 
   #jobs:
-  build-test-push:
-    runs-on: ubuntu-latest
+  #build-test-push:
+   # runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
+    #steps:
+     # - uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      #- name: Login to Docker Hub
+       # run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      - name: Build Image
-        run: docker build -t aceestver:${{ github.ref_name }} .
+      #- name: Build Image
+       # run: docker build -t aceestver:${{ github.ref_name }} .
 
-      - name: Run Tests Inside Container
-        run: docker run aceestver:${{ github.ref_name }} pytest
+      #- name: Run Tests Inside Container
+       # run: docker run aceestver:${{ github.ref_name }} pytest
 
-      - name: Push Image
-        run: docker push aceestver:${{ github.ref_name }}
+      #- name: Push Image
+       # run: docker push aceestver:${{ github.ref_name }}
