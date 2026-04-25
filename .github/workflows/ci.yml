@@ -91,3 +91,37 @@ jobs:
             -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+trigger-jenkins:
+    runs-on: self-hosted
+    needs: sonarcloud-analysis
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Trigger Jenkins Job
+        uses: appleboy/jenkins-action@v1
+        with:
+          url: ${{ secrets.JENKINS_URL }}
+          user: "cloud"
+          token: ${{ secrets.JENKINS_TOKEN }}
+          job: "Test-Assignment2"
+          wait: true
+
+
+#jobs:
+build-test-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Build Image
+        run: docker build -t aceestver:${{ github.ref_name }} .
+
+      - name: Run Tests Inside Container
+        run: docker run aceestver:${{ github.ref_name }} pytest
+
+      - name: Push Image
+        run: docker push aceestver:${{ github.ref_name }}
