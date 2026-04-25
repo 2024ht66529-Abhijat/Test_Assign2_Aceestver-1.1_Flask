@@ -42,6 +42,8 @@ jobs:
         run: |
           coverage run --source=. -m pytest
           coverage xml -i --rcfile=.coveragerc
+          sed -i 's|<source>.*</source>|<source>.</source>|' coverage.xml
+
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
