@@ -19,6 +19,7 @@ on:
         required: false
         default: 'true'
         type: boolean
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,11 +47,6 @@ jobs:
         run: |
           python -c "import re; f='coverage.xml'; d=open(f).read(); d=re.sub(r'<source>.*</source>', '<source>.</source>', d); open(f,'w').write(d)"
 
-      - name: Debug coverage.xml before upload
-        run: |
-          grep "<source>" coverage.xml
-          cat coverage.xml | head -n 20   # show first 20 lines
-
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
@@ -65,18 +61,10 @@ jobs:
         with:
           fetch-depth: 0   
 
-      - name: Show sonar-project.properties
-        run: cat sonar-project.properties     
-
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
-
-      - name: Debug coverage.xml after download
-        run: |
-          grep "<source>" coverage.xml
-          cat coverage.xml | head -n 20   # show first 20 lines
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -91,6 +79,55 @@ jobs:
             -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Fetch SonarCloud Issues
+        run: |
+          curl -s -u ${{ secrets.SONAR_TOKEN }}: \
+            "https://sonarcloud.io/api/issues/search?componentKeys=${{ secrets.SONAR_PROJECT_KEY }}&resolved=false" \
+            -o sonar_issues.json
+
+      - name: Fetch SonarCloud Quality Gate
+        run: |
+          curl -s -u ${{ secrets.SONAR_TOKEN }}: \
+            "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}" \
+            -o sonar_quality_gate.json
+
+      - name: Generate SonarCloud Summary (Markdown)
+        run: |
+          python3 <<'EOF'
+          import json, pathlib
+
+          issues = json.load(open("sonar_issues.json"))
+          qg     = json.load(open("sonar_quality_gate.json"))
+
+          out = pathlib.Path("sonar_summary.md")
+          with out.open("w") as f:
+              f.write("# SonarCloud Analysis Summary\n\n")
+
+              status = qg.get("projectStatus", {}).get("status", "UNKNOWN")
+              f.write(f"**Quality Gate Status:** {status}\n\n")
+
+              total = issues.get("total", 0)
+              f.write(f"**Open Issues:** {total}\n\n")
+
+              f.write("### Top Issues\n")
+              for i, issue in enumerate(issues.get("issues", [])[:10], 1):
+                  sev = issue.get("severity")
+                  msg = issue.get("message")
+                  rule = issue.get("rule")
+                  comp = issue.get("component")
+                  f.write(f"{i}. [{sev}] {msg} (rule: {rule}, file: {comp})\n")
+          EOF
+
+      - name: Upload SonarCloud Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-report
+          path: |
+            sonar_issues.json
+            sonar_quality_gate.json
+            sonar_summary.md
+
   trigger-jenkins:
     runs-on: self-hosted
     needs: sonarcloud-analysis
@@ -105,23 +142,3 @@ jobs:
           token: ${{ secrets.JENKINS_TOKEN_L }}
           job: "Test-Assignment2"
           wait: true
-
-
-  
-  #build-test-push:
-   # runs-on: ubuntu-latest
-
-    #steps:
-     # - uses: actions/checkout@v3
-
-      #- name: Login to Docker Hub
-       # run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
-      #- name: Build Image
-       # run: docker build -t aceestver:${{ github.ref_name }} .
-
-      #- name: Run Tests Inside Container
-       # run: docker run aceestver:${{ github.ref_name }} pytest
-
-      #- name: Push Image
-       # run: docker push aceestver:${{ github.ref_name }}
