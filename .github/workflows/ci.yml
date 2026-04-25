@@ -65,6 +65,9 @@ jobs:
         with:
           fetch-depth: 0   
 
+      - name: Show sonar-project.properties
+        run: cat sonar-project.properties     
+
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
