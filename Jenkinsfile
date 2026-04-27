@@ -2,15 +2,20 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME     = "2024ht66529/aceestver"
-        APP_VERSION    = "stable"
-        APP_PORT       = "9090"   // avoid Jenkins 8080 conflict
-        KUBECONFIG    = "/home/abhij/.kube/config"
-        MINIKUBE_HOME = "/home/abhij/.minikube"
-        PATH          = "/usr/local/bin:${env.PATH}"
-    }
-
+    DOCKER_REPO = "2024ht66529/aceestver"
+    NODE_PORT   = "30080"
+    PUBLIC_IP   = "3.27.27.102"
+    PATH = "/usr/local/bin:${env.PATH}"
+}
     stages {
+        
+        stage('Set Version') {
+        steps {
+            script {
+                env.APP_VERSION = sh(script: "git tag --points-at HEAD || echo ${env.BRANCH_NAME}", returnStdout: true).trim()
+            }
+        }
+    }
         stage('Sanity Check') {
             steps {
                 sh 'whoami'
